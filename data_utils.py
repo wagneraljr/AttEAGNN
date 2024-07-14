@@ -5,45 +5,44 @@ import csv
 import os
 import pandas as pd
 
-# Função para carregar dados de um grafo e uma matriz de tráfego a partir de arquivos
+# Generates graph information, node and edge features from a .gml file
 def load_data(filepath):
-    # Carrega o grafo da rede Abilene a partir de um arquivo GML
+    # Creates the RNP network graph from the .gml file
     G = nx.read_gml(filepath)
 
-    # Cria um mapeamento de rótulos de nós para índices inteiros
+    # Maps node labels to integer indices
     label_to_index = {label: idx for idx, label in enumerate(G.nodes())}
     
-    # Atualiza o grafo para usar rótulos inteiros
+    # Updates the graph to use integer labels
     G = nx.relabel_nodes(G, label_to_index)
 
-    # Extrai atributos dos nós (aqui, usando uma codificação one-hot)
+    # Extract node features (one-hot encoding)
     node_features = np.eye(G.number_of_nodes())
     node_features = torch.tensor(node_features, dtype=torch.float32)
 
-    # Extrai índices das arestas
+    # Extract edge feautures
     edge_indices = np.array(G.edges())
     edge_indices = torch.tensor(edge_indices, dtype=torch.long).t().contiguous()
 
-    # Calcula atributos implícitos das arestas
-    # Calcula a centralidade de intermediação das arestas
+    # Calculate implicit edge features
+    # Calculate edge betweenness 
     edge_betweenness = nx.edge_betweenness_centrality(G)
-    
-    # Calcula atributos das arestas
+
+    # Appends edge features
     edge_features = []
     for edge in G.edges(data=True):
         src, dst = edge[0], edge[1]
         
-        # Atributo original, caso não exista, usa um vetor de 8 zeros
+        # Explicit features, or a vector of zeros if none
         feature = edge[2].get('feature', [0]*8)
-        #feature = edge[2].get('feature')
         
-        # Centralidade de intermediação
+        # Edge betweenness
         feature.append(edge_betweenness[(src, dst)])
         
-        # Grau da aresta (soma dos graus dos dois nós conectados pela aresta)
+        # Edge degree, defined as the sum of the degrees of its nodes
         feature.append(G.degree[src] + G.degree[dst])
         
-        # Coeficiente de agrupamento
+        # Edge clustering coefficient, defined as the average of its nodes coefficients
         clustering_src = nx.clustering(G, src)
         clustering_dst = nx.clustering(G, dst)
         avg_clustering = (clustering_src + clustering_dst) / 2
@@ -51,7 +50,7 @@ def load_data(filepath):
         
         edge_features.append(feature)
     
-    # Converte características das arestas para um tensor
+    # Convert edge features to tensor
     edge_features = torch.tensor(edge_features, dtype=torch.float32)
     
     return node_features, edge_indices, edge_features
