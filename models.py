@@ -4,73 +4,73 @@ import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, GraphConv, global_mean_pool
 import numpy as np
 
-# Classe que implementa um mecanismo de atenção para arestas em redes neurais baseadas em grafos
+# Class that implements the edge attention mechanism
 class EdgeAttention(nn.Module):
     def __init__(self, edge_feature_dim, hidden_dim):
         super(EdgeAttention, self).__init__()
-        # Uma camada linear que transforma os atributos das arestas
+        # Linear layer for edge feature transforming
         self.edge_weight = nn.Linear(edge_feature_dim, hidden_dim)
-        # Função de ativação LeakyReLU
+        # LeakyReLU activation function
         self.leaky_relu = nn.LeakyReLU()
 
     def forward(self, edge_features):
-        # Aplica a transformação linear aos atributos das arestas
+        # Applies linear transforming to edge features
         edge_transformed = self.edge_weight(edge_features)
-        # Calcula a pontuação de atenção para cada aresta, usando produto escalar
+        # Get attention scores to each edge using dot product
         attention_scores = (edge_transformed * edge_transformed).sum(dim=1)
-        # Aplica a função de ativação LeakyReLU às pontuações
+        # Apply LeakyReLU to the scores
         attention_scores = self.leaky_relu(attention_scores)
-        # Normaliza as pontuações usando softmax para obter coeficientes de atenção
+        # Normalize scores using softmax to get attention coefficients
         attention_coeffs = F.softmax(attention_scores, dim=0)
         return attention_coeffs
     
-# Classe que define um modelo GCN ciente dos atributos das arestas com mecanismo de atenção
+# Defines the AttEAGNN model
 class AttEdgeAwareGNN(nn.Module):
     def __init__(self, node_input_dim, edge_input_dim, hidden_dim, output_dim, dropout=0.5):
         super(AttEdgeAwareGNN, self).__init__()
         print('node:', node_input_dim)
         print('output:', output_dim)
-        # Define camadas convolucionais de grafos para os atributos dos nós
+        # Node feature processing convolutional layers
         self.gc1 = GraphConv(node_input_dim, hidden_dim)
         self.gc2 = GraphConv(hidden_dim, hidden_dim)
-        # Define uma camada SAGE para os atributos das arestas
+        # Edge feature processing SAGE layer
         self.edge_gcn = SAGEConv(edge_input_dim, hidden_dim)
-        # Inicializa o mecanismo de atenção para as arestas
+        # Initialize edge attention mechanism
         self.edge_attention = EdgeAttention(edge_input_dim, hidden_dim)
-        #self.edge_attention = EdgeAttention(edge_input_dim, hidden_dim)
-        # Camada linear para combinar os atributos dos nós e arestas
+        # Linear layer to combine edge and node features
         self.fc = nn.Linear(2 * hidden_dim, output_dim)
         self.dropout = dropout
 
     def forward(self, node_features, edge_index, edge_features):
-        # Aplica a primeira camada convolucional e ativação ReLU aos nós
+        # First node convolutional layer and ReLU activation
         x = F.relu(self.gc1(node_features, edge_index))
         x = F.dropout(x, self.dropout, training=self.training)
-        # Aplica a segunda camada convolucional aos nós
+        # Second node convolutional layer
         x = F.relu(self.gc2(x, edge_index))
         
-        # Aplica a camada convolucional aos atributos das arestas
+        # SAGE edge feature processing layer
         e = F.relu(self.edge_gcn(edge_features, edge_index))
         
-        # Calcula os coeficientes de atenção para as arestas
+        # Get edge attention coefficients
         attention_coeffs = self.edge_attention(edge_features)
         
-        # Inicializa tensores para agregação de informações dos vizinhos e arestas
+        # Initializes tensors for edge and neighborhood information aggregation
         row, col = edge_index
         aggregated_neighbors = torch.zeros_like(x)
         aggregated_edges = torch.zeros_like(x)
 
-        # Realiza a agregação por soma ponderada pelas atenções
+        # Aggregates features via weighted sum
         for src, dest, edge, coeff in zip(row, col, e, attention_coeffs):
             aggregated_neighbors[dest] += coeff * x[src]
             aggregated_edges[dest] += coeff * edge
         
-        # Combina os atributos dos nós com os atributos agregados das arestas
+        # Concatenates node and aggregated edge features
         x = torch.cat([x + aggregated_neighbors, aggregated_edges], dim=1)
         x = self.fc(x)
         
         return x
 
+# Process edge graph features for the CAGNN model
 class AGGEdgeGraph(torch.nn.Module):
     def __init__(self, in_edge_feats, hidden_size):
         super(AGGEdgeGraph, self).__init__()
@@ -96,6 +96,7 @@ class COMEdgeGraph(torch.nn.Module):
     def forward(self, agg_feat):
         return self.mlp(agg_feat)
 
+# Process node graph features for the CAGNN model
 class AGGNodeGraph(torch.nn.Module):
     def __init__(self, in_node_feats, hidden_size):
         super(AGGNodeGraph, self).__init__()
@@ -121,6 +122,7 @@ class COMNodeGraph(torch.nn.Module):
     def forward(self, agg_feat):
         return self.mlp(agg_feat)
 
+# Defines a single CAGNN model layer
 class CAGNNLayer(torch.nn.Module):
     def __init__(self, in_node_feats, in_edge_feats, hidden_size):
         super(CAGNNLayer, self).__init__()
@@ -143,6 +145,7 @@ class CAGNNLayer(torch.nn.Module):
 
         return new_node_feats, new_edge_feats
 
+# CAGNN model implementation
 class CAGNN(torch.nn.Module):
     def __init__(self, num_layers, in_node_feats, in_edge_feats, hidden_size, out_feats):
         super(CAGNN, self).__init__()
@@ -155,43 +158,41 @@ class CAGNN(torch.nn.Module):
     def forward(self, node_neighbors, edge_neighbors, node_feats, edge_feats):
         for layer in self.layers:
             node_feats, edge_feats = layer(node_neighbors, edge_neighbors, node_feats, edge_feats)
-        # Representação final dos nós
+
         out = self.final_layer(node_feats)
         return out
    
-# Classe que define um modelo GraphSAGE
+# Defines a GraphSAGE model
 class GraphSAGE(nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels, dropout):
         super(GraphSAGE, self).__init__()
-        # Define duas camadas convolucionais SAGE
+        # Defines two SAGEConv layers
         self.conv1 = SAGEConv(in_channels, hidden_channels)
         self.conv2 = SAGEConv(hidden_channels, out_channels)
         self.dropout = dropout
 
-    # Define o passo de propagação para frente (forward) do modelo
     def forward(self, x, edge_index):
-        # Aplica a primeira camada convolucional, ReLU e dropout
+        # First convolutional layer, ReLU and dropout
         x = self.conv1(x, edge_index)
         x = F.relu(x)
         x = F.dropout(x, self.dropout, training=self.training)
-        # Aplica a segunda camada convolucional
+        # Second convolutional layer
         x = self.conv2(x, edge_index)
         return x
 
-# Classe que define um modelo GCN (Graph Convolutional Network)
+# Defines a GCN model
 class GCN(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout=0.5):
         super(GCN, self).__init__()
-        # Define duas camadas convolucionais de grafos
+        # Defines two GraphConv layers
         self.gc1 = GraphConv(nfeat, nhid)
         self.gc2 = GraphConv(nhid, nclass)
         self.dropout = dropout
 
-    # Define o passo de propagação para frente do modelo
     def forward(self, x, edge_index):
-        # Aplica a primeira camada convolucional, ReLU e dropout
+        # First convolutional layer, ReLU and dropout
         x = F.relu(self.gc1(x, edge_index))
         x = F.dropout(x, self.dropout, training=self.training)
-        # Aplica a segunda camada convolucional
+        # Second convolutional layer
         x = self.gc2(x, edge_index)
         return x 
