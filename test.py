@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from models import GCN, GraphSAGE, AttEdgeAwareGCN, CAGNN
+from models import GCN, GraphSAGE, AttEdgeAwareGNN, CAGNN
 import torch
 import torch.nn as nn
 from data_utils import load_data, get_node_loads, load_data_cagnn, normalize_features
@@ -8,19 +8,23 @@ import os
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.optim.lr_scheduler import StepLR
 
+# Get RNP network information and normalize edge features
 node_features, edge_indices, edge_features = load_data("rnp.gml.txt")
 edge_features = normalize_features(edge_features)
+# Get target node loads
 actual_node_loads = get_node_loads("traffic_matrices/sparsified_gravity_cyclical/target/sparsified_gravity_cyclical_tm_8639.dat")
+# Defines loss function
 loss_fn = nn.MSELoss()
-
+# Get historical training traffic matrices
 traffic_matrix_files = sorted([file for file in os.listdir("traffic_matrices/sparsified_gravity_cyclical/day/") if file.endswith('.dat')])
 
+# Fixates a random seed for reproducibility
 seed = 48362
 torch.manual_seed(seed)
 np.random.seed(seed)
 
 # Optimized Hyper parameters
-edge_aware_model = AttEdgeAwareGCN(node_features.size(1), edge_features.size(1), 32, 1, 0.26896778382768677)
+edge_aware_model = AttEdgeAwareGNN(node_features.size(1), edge_features.size(1), 32, 1, 0.26896778382768677)
 optimizer_edgeaware = torch.optim.Adam(list(edge_aware_model.parameters()), lr=0.0035191532755729435) 
 scheduler_edgeaware = StepLR(optimizer_edgeaware, step_size=75, gamma= 0.8953758492665873)
 edge_aware_losses = []
@@ -30,11 +34,9 @@ for epoch in range(300):
     for traffic_matrix_filepath in traffic_matrix_files:
         tm = "traffic_matrices/sparsified_gravity_cyclical/day/" + traffic_matrix_filepath
         node_loads = get_node_loads(tm)
-        #print(node_loads.shape)
-                
+                        
         optimizer_edgeaware.zero_grad()
         edge_aware_predictions = edge_aware_model(node_features, edge_indices, edge_features)
-        #assert edge_aware_predictions.size(0) == node_loads.size(0), f"Tamanho do tensor predictions {edge_aware_predictions.size(0)} e node_loads {node_loads.size(0)} não batem"
 
         edge_aware_loss = loss_fn(edge_aware_predictions, node_loads)
         edge_aware_losses.append(edge_aware_loss.item())
@@ -100,6 +102,7 @@ for epoch in range(200):
 gcn_predictions = gcn_model(node_features, edge_indices)
 gcn_predictions = gcn_predictions.detach().numpy()
 
+# Reset random seed for consistency
 seed = 48362
 torch.manual_seed(seed)
 np.random.seed(seed)
@@ -131,7 +134,7 @@ for epoch in range(200):
 cagnn_predictions = cagnn_model(node_neighbors, edge_neighbors, node_features, edge_features)
 cagnn_predictions = cagnn_predictions.detach().numpy()
 
-# Função para plotar as curvas de perda dos modelos
+# Function for plotting loss curves comparison
 def plot_loss_curves(losses_dict, markers):
     plt.figure(figsize=(10, 6))
     plt.rc('font', size=20)
@@ -145,7 +148,7 @@ def plot_loss_curves(losses_dict, markers):
     plt.grid(True)
     plt.savefig('loss_curves_day_rnp.png')
 
-# Plotando as curvas de perda
+# Sets losses values for each model
 losses_dict = {
     'AttEAGNN': edge_aware_losses,
     'CAGNN': cagnn_losses,
@@ -160,34 +163,44 @@ markers = {
 }
 plot_loss_curves(losses_dict, markers)
 
-# Plotando a pontuação R2
+# Calculates and prints R² scores for each model
+edge_aware_r2 = r2_score(actual_node_loads, edge_aware_predictions)
+print('Edge Aware GNN R2: ', edge_aware_r2)
+cagnn_r2 = r2_score(actual_node_loads, cagnn_predictions)
+print('CAGNN R2: ', cagnn_r2)
+graphsage_r2 = r2_score(actual_node_loads, graphsage_predictions)
+print('GraphSAGE R2: ', graphsage_r2)
+gcn_r2 = r2_score(actual_node_loads, gcn_predictions)
+print('GCN R2: ', gcn_r2)
+
+# Plots R² scores
 plt.figure(figsize=(10, 5))
 plt.rc('font', size=20)
 plt.bar(['AttEAGNN', 'CAGNN', 'GraphSAGE', 'GCN'], [edge_aware_r2, cagnn_r2, graphsage_r2, gcn_r2])
 plt.ylabel('R2')
 plt.savefig('r2_day_rnp.png')
 
-# Função auxiliar para calcular métricas MAE e RMSE
+# Auxiliary function to calculate MAE and RMSE
 def compute_metrics(y_true, y_pred):
     mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     return {'MAE': mae, 'RMSE': rmse}
 
-# Função para plotar as métricas MAE e RMSE para cada modelo
+# Plots MAE and RMSE for each model
 def plot_metrics(metrics_dict):
     labels = list(metrics_dict.keys())
     mae_scores = [metrics['MAE'] for metrics in metrics_dict.values()]
     rmse_scores = [metrics['RMSE'] for metrics in metrics_dict.values()]
     
-    x = np.arange(len(labels))  # Localização das etiquetas
-    width = 0.3  # Largura das barras
+    x = np.arange(len(labels))  # Label placement
+    width = 0.3  # Bar width
     
     fig, ax = plt.subplots(figsize=(15, 7))
    
     rects1 = ax.bar(x - width/2, mae_scores, width, label='MAE')
     rects2 = ax.bar(x + width/2, rmse_scores, width, label='RMSE')
 
-  ax.set_xticks(x)
+    ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
 
@@ -195,7 +208,7 @@ def plot_metrics(metrics_dict):
 
     plt.savefig('metrics_day.png')
 
-# Calculando e plotando outras métricas (MAE e RMSE)
+# Calculates and plots MAE and RMSE
 metrics_dict = {
     'AttEdge-Aware GNN': compute_metrics(actual_node_loads, edge_aware_predictions),
     'CAGNN': compute_metrics(actual_node_loads, cagnn_predictions),
