@@ -2,7 +2,7 @@ import networkx as nx
 
 G = nx.Graph()
 
-# Adicionar os nós com as coordenadas geográficas
+# Add nodes with geografical coordinates
 G.add_node('Porto Alegre', pos = (-30.033056, -51.230000))
 G.add_node('Florianopolis', pos = (-27.593500, -48.558540))
 G.add_node('Curitiba', pos = (-25.441105, -49.276855))
@@ -32,7 +32,7 @@ G.add_node('Joao Pessoa', pos = (-7.11532, -34.861))
 G.add_node('Recife', pos = (-8.05428, -34.8813))
 G.add_node('Maceio', pos = (-9.66625, -35.7351))
 
-# Adicionar arestas com atributos largura de banda e distância geográfica
+# Add edges with bandwith and geografical distance as features
 G.add_edge('Porto Alegre', 'Florianopolis', bw = 100, dist = 375.91)
 G.add_edge('Porto Alegre', 'Curitiba', bw = 200, dist = 545.55)
 G.add_edge('Porto Alegre', 'Sao Paulo', bw = 100, dist = 854.86)
