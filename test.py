@@ -9,7 +9,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.optim.lr_scheduler import StepLR
 
 # Get RNP network information and normalize edge features
-node_features, edge_indices, edge_features = load_data("rnp.gml.txt")
+node_features, edge_indices, edge_features = load_data("rnp.gml")
 edge_features = normalize_features(edge_features)
 # Get target node loads
 actual_node_loads = get_node_loads("traffic_matrices/sparsified_gravity_cyclical/target/sparsified_gravity_cyclical_tm_8639.dat")
@@ -107,7 +107,7 @@ seed = 48362
 torch.manual_seed(seed)
 np.random.seed(seed)
 
-node_features, edge_indices, edge_features, node_neighbors, edge_neighbors = load_data_cagnn("rnp.gml.txt")
+node_features, edge_indices, edge_features, node_neighbors, edge_neighbors = load_data_cagnn("rnp.gml")
 node_features = normalize_features(node_features)
 edge_features = normalize_features(edge_features)
 
