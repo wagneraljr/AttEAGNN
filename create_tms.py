@@ -177,7 +177,7 @@ G.add_edge('Maceio', 'Aracaju', bw = 100, dist = 201.48)
 output_dir = "./traffic_matrices"
 os.makedirs(output_dir, exist_ok=True)
 
-# Create a month's worth of TMs with cycles of 7 days
+# Create one month's worth of TMs with cycles of 7 days
 simulate_bimodal_traffic(G, 8640, 1, output_dir)
 
 simulate_gravity_traffic(G, 8640, 1, output_dir, cyclical=True, q=2016)
