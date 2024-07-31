@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
 import torch
 import os
+
 ckpts = {}
 dirs =  [dirr for dirr in os.listdir(Constants.path_results) if not dirr.endswith('.png')]
 
@@ -16,11 +17,9 @@ for dirr in dirs:
 losses_dict = {}
 num_models =  len(ckpts)
 
-# Calculates and prints R² scores for each model
 actual_node_loads = DataUtil.get_node_loads(Constants.path_to_target_data)
 r2s = []
-# Calculates and plots MAE and RMSE
-metrics_dict = {}
+
 
 for model_name in dirs:
     r2 = r2_score(actual_node_loads, ckpts[model_name]['predictions'])
@@ -33,6 +32,7 @@ dirs = [model_name for model_name,_ in r2s]
 
 r2s = [r2 for _,r2 in r2s]
 
+metrics_dict = {}
 for model_name in dirs:
     metrics_dict[model_name] = EvalUtil.compute_metrics(actual_node_loads,ckpts[model_name]['predictions'])
 
