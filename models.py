@@ -28,8 +28,6 @@ class EdgeAttention(nn.Module):
 class AttEdgeAwareGNN(nn.Module):
     def __init__(self, node_input_dim, edge_input_dim, hidden_dim, output_dim, dropout=0.5):
         super(AttEdgeAwareGNN, self).__init__()
-        print('node:', node_input_dim)
-        print('output:', output_dim)
         # Node feature processing convolutional layers
         self.gc1 = GraphConv(node_input_dim, hidden_dim)
         self.gc2 = GraphConv(hidden_dim, hidden_dim)
