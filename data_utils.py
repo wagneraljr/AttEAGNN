@@ -159,7 +159,7 @@ def get_node_loads(traffic_matrix_filepath):
 
 # Auxiliary function to normalize edge and node features
 def normalize_features(features):
-    return (features - features.mean()) / features.std()
+    return (features - features.mean(dim=0)) / features.std(dim=0)
 
 # Function to convert data from .dat files to pandas
 def load_traffic_pd(file_path):
