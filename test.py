@@ -111,7 +111,7 @@ node_features, edge_indices, edge_features, node_neighbors, edge_neighbors = loa
 node_features = normalize_features(node_features)
 edge_features = normalize_features(edge_features)
 
-cagnn_model = CAGNN(2, node_features.size(1), edge_features.size(1), 64, 1, 0.42181608156931477)
+cagnn_model = CAGNN(2, node_features.size(1), edge_features.size(1), 64, 1)
 optimizer_cagnn = torch.optim.Adam(list(cagnn_model.parameters()), lr=0.005256305981655686)
 scheduler_cagnn = StepLR(optimizer_cagnn, step_size=75, gamma=0.8587686449302072)
 cagnn_losses = []
