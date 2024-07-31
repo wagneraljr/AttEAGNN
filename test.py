@@ -117,7 +117,7 @@ scheduler_cagnn = StepLR(optimizer_cagnn, step_size=75, gamma=0.8587686449302072
 cagnn_losses = []
 
 # CAGNN training loop
-for epoch in range(200):
+for epoch in range(300):
     for traffic_matrix_filepath in traffic_matrix_files:
         tm = "traffic_matrices/sparsified_gravity_cyclical/day/" + traffic_matrix_filepath
         node_loads = get_node_loads(tm)
