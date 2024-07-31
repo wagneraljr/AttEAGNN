@@ -1,0 +1,214 @@
+{
+    "coordinates": {
+        "Porto Alegre": [
+            -30.033056,
+            -51.23
+        ],
+        "Florianopolis": [
+            -27.5935,
+            -48.55854
+        ],
+        "Curitiba": [
+            -25.441105,
+            -49.276855
+        ],
+        "Sao Paulo": [
+            -23.533773,
+            -46.62529
+        ],
+        "Campo Grande": [
+            -20.4435,
+            -54.6478
+        ],
+        "Goiania": [
+            -16.665136,
+            -49.286041
+        ],
+        "Cuiaba": [
+            -15.5989,
+            -56.0949
+        ],
+        "Porto Velho": [
+            -8.76183,
+            -63.902
+        ],
+        "Rio Branco": [
+            -9.974,
+            -67.8076
+        ],
+        "Brasilia": [
+            -15.793889,
+            -47.882778
+        ],
+        "Rio de Janeiro": [
+            -22.908333,
+            -43.196388
+        ],
+        "Belo Horizonte": [
+            -19.912998,
+            -43.940933
+        ],
+        "Salvador": [
+            -12.974722,
+            -38.476665
+        ],
+        "Fortaleza": [
+            -3.731862,
+            -38.526669
+        ],
+        "Sao Luis": [
+            -2.53073,
+            -44.3068
+        ],
+        "Manaus": [
+            -3.117034,
+            -60.02578
+        ],
+        "Palmas": [
+            -10.1689,
+            -48.3317
+        ],
+        "Vitoria": [
+            -20.3222,
+            -40.3381
+        ],
+        "Aracaju": [
+            -10.9095,
+            -37.0748
+        ],
+        "Campina Grande": [
+            -7.23072,
+            -35.8817
+        ],
+        "Teresina": [
+            -5.08921,
+            -42.8016
+        ],
+        "Belem": [
+            -1.45502,
+            -48.5024
+        ],
+        "Macapa": [
+            0.0344566,
+            -51.0666
+        ],
+        "Boa Vista": [
+            2.81954,
+            -60.6714
+        ],
+        "Natal": [
+            -5.79448,
+            -35.211
+        ],
+        "Joao Pessoa": [
+            -7.11532,
+            -34.861
+        ],
+        "Recife": [
+            -8.05428,
+            -34.8813
+        ],
+        "Maceio": [
+            -9.66625,
+            -35.7351
+        ]
+    },
+    "distances": {
+        "Porto Alegre-Florianopolis": 375.91,
+        "Porto Alegre-Curitiba": 545.55,
+        "Porto Alegre-Sao Paulo": 854.86,
+        "Florianopolis-Curitiba": 249.78,
+        "Curitiba-Sao Paulo": 342.0,
+        "Curitiba-Campo Grande": 781.64,
+        "Sao Paulo-Brasilia": 870.63,
+        "Sao Paulo-Rio de Janeiro": 357.21,
+        "Sao Paulo-Belo Horizonte": 488.82,
+        "Sao Paulo-Fortaleza": 2367.5,
+        "Campo Grande-Goiania": 704.13,
+        "Campo Grande-Cuiaba": 559.99,
+        "Goiania-Brasilia": 178.41,
+        "Cuiaba-Porto Velho": 1138.87,
+        "Cuiaba-Brasilia": 879.31,
+        "Porto Velho-Rio Branco": 449.18,
+        "Brasilia-Rio de Janeiro": 931.19,
+        "Brasilia-Belo Horizonte": 619.47,
+        "Brasilia-Salvador": 1060.33,
+        "Brasilia-Fortaleza": 1686.96,
+        "Brasilia-Sao Luis": 1525.9,
+        "Brasilia-Manaus": 1937.24,
+        "Brasilia-Palmas": 627.36,
+        "Rio de Janeiro-Belo Horizonte": 341.87,
+        "Rio de Janeiro-Vitoria": 412.28,
+        "Belo Horizonte-Vitoria": 378.91,
+        "Belo Horizonte-Salvador": 966.57,
+        "Salvador-Vitoria": 840.68,
+        "Salvador-Aracaju": 275.66,
+        "Salvador-Campina Grande": 698.97,
+        "Salvador-Fortaleza": 1027.77,
+        "Salvador-Teresina": 997.0,
+        "Fortaleza-Teresina": 497.38,
+        "Fortaleza-Boa Vista": 2566.51,
+        "Fortaleza-Natal": 433.1,
+        "Sao Luis-Teresina": 329.88,
+        "Sao Luis-Belem": 481.34,
+        "Manaus-Macapa": 1055.59,
+        "Manaus-Boa Vista": 664.01,
+        "Palmas-Belem": 969.12,
+        "Aracaju-Maceio": 201.48,
+        "Campina Grande-Natal": 176.05,
+        "Campina Grande-Joao Pessoa": 113.34,
+        "Campina Grande-Recife": 143.32,
+        "Belem-Macapa": 329.71,
+        "Joao Pessoa-Recife": 104.43,
+        "Recife-Maceio": 202.3
+    },
+    "bandwith": {
+        "Porto Alegre-Florianopolis": 100,
+        "Porto Alegre-Curitiba": 200,
+        "Porto Alegre-Sao Paulo": 100,
+        "Florianopolis-Curitiba": 100,
+        "Curitiba-Sao Paulo": 300,
+        "Curitiba-Campo Grande": 10,
+        "Sao Paulo-Brasilia": 20,
+        "Sao Paulo-Rio de Janeiro": 200,
+        "Sao Paulo-Belo Horizonte": 100,
+        "Sao Paulo-Fortaleza": 200,
+        "Campo Grande-Goiania": 10,
+        "Campo Grande-Cuiaba": 100,
+        "Goiania-Brasilia": 20,
+        "Cuiaba-Porto Velho": 100,
+        "Cuiaba-Brasilia": 100,
+        "Porto Velho-Rio Branco": 6,
+        "Brasilia-Rio de Janeiro": 100,
+        "Brasilia-Belo Horizonte": 10,
+        "Brasilia-Salvador": 100,
+        "Brasilia-Fortaleza": 10,
+        "Brasilia-Sao Luis": 100,
+        "Brasilia-Manaus": 3,
+        "Brasilia-Palmas": 100,
+        "Rio de Janeiro-Belo Horizonte": 20,
+        "Rio de Janeiro-Vitoria": 100,
+        "Belo Horizonte-Vitoria": 10,
+        "Belo Horizonte-Salvador": 100,
+        "Salvador-Vitoria": 100,
+        "Salvador-Aracaju": 100,
+        "Salvador-Campina Grande": 10,
+        "Salvador-Fortaleza": 100,
+        "Salvador-Teresina": 100,
+        "Fortaleza-Teresina": 100,
+        "Fortaleza-Boa Vista": 1,
+        "Fortaleza-Natal": 100,
+        "Sao Luis-Teresina": 100,
+        "Sao Luis-Belem": 10,
+        "Manaus-Macapa": 100,
+        "Manaus-Boa Vista": 1,
+        "Palmas-Belem": 100,
+        "Aracaju-Maceio": 100,
+        "Campina Grande-Natal": 100,
+        "Campina Grande-Joao Pessoa": 10,
+        "Campina Grande-Recife": 100,
+        "Belem-Macapa": 100,
+        "Joao Pessoa-Recife": 10,
+        "Recife-Maceio": 10
+    }
+}
