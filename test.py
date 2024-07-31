@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from models import GCN, GraphSAGE, AttEdgeAwareGNN, CAGNN
 import torch
 import torch.nn as nn
@@ -7,6 +6,7 @@ from data_utils import load_data, get_node_loads, load_data_cagnn, normalize_fea
 import os
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.optim.lr_scheduler import StepLR
+import matplotlib.pyplot as plt
 
 # Get RNP network information and normalize edge features
 node_features, edge_indices, edge_features = load_data("rnp.gml")
