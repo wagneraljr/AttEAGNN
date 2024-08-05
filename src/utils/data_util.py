@@ -161,7 +161,7 @@ class DataUtil:
     @staticmethod
     # Auxiliary function to normalize edge and node features
     def normalize_features(features):
-        return (features - features.mean()) / features.std()
+        return (features - features.mean(dim=0)) / features.std(dim=0)
 
     @staticmethod
     # Function to convert data from .dat files to pandas
