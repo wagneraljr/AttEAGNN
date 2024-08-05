@@ -15,12 +15,12 @@ class CAGNNLayer(torch.nn.Module):
         self.layer_norm = torch.nn.LayerNorm(hidden_size)
 
     def forward(self, node_neighbors, edge_neighbors, node_feats, edge_feats):
-        # Atualizar as features das arestas
+        # Updates edge features
         edge_agg_feats = self.edge_agg(edge_feats, edge_neighbors)
         new_edge_feats = self.edge_com(edge_agg_feats)
         new_edge_feats = self.layer_norm(new_edge_feats)
 
-        # Atualizar as features dos nós
+        # Updates node features
         node_agg_feats = self.node_agg(node_feats, new_edge_feats, node_neighbors)
         new_node_feats = self.node_com(node_agg_feats)
         new_node_feats = self.layer_norm(new_node_feats)
