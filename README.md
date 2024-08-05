@@ -63,4 +63,4 @@ Our tool allows the inclusion of custom GNN models for training and testing on t
 
 4. If you have already run the experiments, execute the training in `train_models.py` only for your model and run the `plot_graphics.py` script. Otherwise, run the `run_experiments.sh` including your model.
 
-5. View the graphs in the `results/` folder.
+5. View the graphics in the `results/` folder.
