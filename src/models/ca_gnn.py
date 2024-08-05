@@ -13,6 +13,6 @@ class CAGNN(torch.nn.Module):
     def forward(self, node_neighbors, edge_neighbors, node_feats, edge_feats):
         for layer in self.layers:
             node_feats, edge_feats = layer(node_neighbors, edge_neighbors, node_feats, edge_feats)
-
+        
         out = self.final_layer(node_feats)
         return out
