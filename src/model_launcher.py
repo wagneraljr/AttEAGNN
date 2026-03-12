@@ -17,13 +17,12 @@ class ModelLauncher:
         self.optimizer = None
         self.scheduler = None
 
-    def train(self,path_to_gml_data,loss_fn, dataset: str = 'abilene', tm_split: str = 'day', return_val_loss: bool = False):
-        # Adjust results_path to include dataset and split so printed config reflects actual save location
-        if self.config.results_path:
-            model_folder = os.path.basename(os.path.normpath(self.config.results_path))
-            base_results = os.path.dirname(os.path.normpath(self.config.results_path))
-            new_results_path = os.path.join(base_results, dataset.lower(), tm_split, model_folder) + os.sep
-            self.config.results_path = new_results_path
+    def train(self,path_to_gml_data,loss_fn, dataset: str = 'abilene', tm_split: str = 'day',
+              use_original: bool = True, use_betweenness: bool = True, use_degree: bool = True,
+              use_clustering: bool = True, return_val_loss: bool = False):
+        # Compose results path using canonical pattern: results/<dataset>/<split>/<model_name>/
+        new_results_path = os.path.join(Constants.path_results, dataset.lower(), tm_split, self.config.model_name) + os.sep
+        self.config.results_path = new_results_path
 
         print()
         print(f'Training Model {self.config.model_name}')
@@ -32,7 +31,11 @@ class ModelLauncher:
             print(f'\t{k}:',v)
         print()
         
-        data = self.config.load_data_func(path_to_gml_data)
+        data = self.config.load_data_func(path_to_gml_data,
+                          use_original=use_original,
+                          use_betweenness=use_betweenness,
+                          use_degree=use_degree,
+                          use_clustering=use_clustering)
         data = self.config.class_data(*data)
 
         if self.config.node_norm_func:
@@ -80,12 +83,27 @@ class ModelLauncher:
         predictions = self.model(*data.get_model_args()).detach().numpy().tolist()
 
         if self.config.results_path:
-            # self.config.results_path already includes dataset and split; use it as save dir
+            # Save weights separately and metadata as JSON to avoid insecure pickle use.
             save_dir = os.path.normpath(self.config.results_path)
             os.makedirs(save_dir, exist_ok=True)
-            train_data = {'losses': losses, 'weights': self.model.state_dict(), 'predictions': predictions, 'model_name': self.config.model_name}
-            torch.save(train_data, os.path.join(save_dir, f'{self.config.model_name}.ckpt'))
-            print(f'Checkpoint saved in {save_dir}{os.sep}{self.config.model_name}.ckpt')
+            # Save model weights (state_dict)
+            weights_path = os.path.join(save_dir, f'{self.config.model_name}.weights.pt')
+            torch.save(self.model.state_dict(), weights_path)
+            # Save metadata (losses, predictions, model_name) as JSON
+            try:
+                import json
+                meta = {'losses': losses, 'predictions': predictions, 'model_name': self.config.model_name}
+                meta_path = os.path.join(save_dir, f'{self.config.model_name}.meta.json')
+                with open(meta_path, 'w', encoding='utf-8') as f:
+                    json.dump(meta, f)
+                print(f'Weights saved in {weights_path}')
+                print(f'Metadata saved in {meta_path}')
+            except Exception:
+                # Fallback: save legacy checkpoint if JSON save fails
+                train_data = {'losses': losses, 'weights': self.model.state_dict(), 'predictions': predictions, 'model_name': self.config.model_name}
+                torch.save(train_data, os.path.join(save_dir, f'{self.config.model_name}.ckpt'))
+                print(f'Fallback checkpoint saved in {save_dir}{os.sep}{self.config.model_name}.ckpt')
+            print()
             print()
 
         # By default this method preserves previous behavior (no meaningful return value).

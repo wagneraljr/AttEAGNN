@@ -1,6 +1,7 @@
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from src.constants import Constants
 class EvalUtil:
     @staticmethod
@@ -10,7 +11,7 @@ class EvalUtil:
         return {'MAE': mae, 'RMSE': rmse}
     @staticmethod
     # Plots MAE and RMSE for each model
-    def plot_metrics(metrics_dict):
+    def plot_metrics(metrics_dict, save_folder=None):
         labels = list(metrics_dict.keys())
         mae_scores = [metrics['MAE'] for metrics in metrics_dict.values()]
         rmse_scores = [metrics['RMSE'] for metrics in metrics_dict.values()]
@@ -29,9 +30,13 @@ class EvalUtil:
 
         fig.tight_layout()
 
-        plt.savefig(f'{Constants.path_results}metrics_day.png')
+        if save_folder:
+            os.makedirs(save_folder, exist_ok=True)
+            plt.savefig(os.path.join(save_folder, 'metrics.png'))
+        else:
+            plt.savefig(f'{Constants.path_results}metrics_day.png')
     @staticmethod
-    def plot_loss_curves(losses_dict, markers):
+    def plot_loss_curves(losses_dict, markers, save_folder=None):
         plt.figure(figsize=(10, 6))
         plt.rc('font', size=20)
         for model_name, loss_values in zip(losses_dict.keys(), losses_dict.values()):
@@ -42,4 +47,8 @@ class EvalUtil:
         plt.ylim(0, 0.05)
         plt.legend()
         plt.grid(True)
-        plt.savefig(f'{Constants.path_results}loss_curves_day_rnp.png')
+        if save_folder:
+            os.makedirs(save_folder, exist_ok=True)
+            plt.savefig(os.path.join(save_folder, 'loss_curves.png'))
+        else:
+            plt.savefig(f'{Constants.path_results}loss_curves_day_rnp.png')

@@ -16,7 +16,7 @@ class CAGNNConfig(Config):
 
         self.class_data = CAGNNData
 
-        self.results_path = Constants.path_results + self.model_name + os.sep
+        self.results_path = Constants.path_results
 
         self.enum_optim = EnumOptim.ADAM
         self.enum_scheduler = EnumScheduler.STEP_LR

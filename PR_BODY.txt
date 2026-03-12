@@ -1,0 +1,43 @@
+Title: CLI: add model selection, per-dataset hyperparams, separate weights/meta, plot migration
+
+Summary
+- Adds runtime model selection (`--models`) and applies per-(dataset,split) hyperparameter overrides from configs.
+- Saves experiment outputs as separate files: `<model>.weights.pt` (state_dict) and `<model>.meta.json` (losses, predictions).
+- Updates `plot_graphics.py` to read the new format, migrate legacy `.ckpt` files to the new format and remove legacy `.ckpt`.
+- Small refactors: compose canonical results path `results/<dataset>/<split>/<model_name>/` in `ModelLauncher`.
+
+Key changes (high level)
+- CLI and orchestration: `train_models.py`
+- Checkpointing / saving: `src/model_launcher.py`
+- Plotting + migration: `plot_graphics.py`
+- Eval plotting utilities: `src/utils/eval_util.py`
+- Configs: per-model overrides added to `configs/att_edge_aware_config.py`, `configs/gcn_config.py`, `configs/graphsage_config.py`
+- README updated to document new CLI and results format: `README.md`
+
+Migration & compatibility notes
+- `plot_graphics.py` will auto-migrate existing legacy `.ckpt` files into `.meta.json` + `.weights.pt` the first time it runs and will remove the legacy `.ckpt` after successful migration.
+- New training saves follow the new format; legacy `.ckpt` fallback kept if JSON write fails.
+
+Testing performed
+- `python train_models.py --dry-run --dataset abilene --split day` (sanity check paths)
+- `python plot_graphics.py --dataset abilene --split day` (migration + metrics output)
+- Verified `results/abilene/day/<Model>/` contains `.weights.pt` and `.meta.json` after migration.
+
+How to review / run locally
+1. Dry-run to check paths:
+   ```bash
+   python train_models.py --dry-run --dataset abilene --split day
+   ```
+2. Generate plots / trigger migration:
+   ```bash
+   python plot_graphics.py --dataset abilene --split day
+   ```
+3. To run training for specific models:
+   ```bash
+   python train_models.py --models AttEAGNN GCN --dataset abilene --split day
+   ```
+
+Reviewer checklist
+- Confirm per-(dataset,split) overrides are correct in each `configs/<model>_config.py`.
+- Verify no sensitive objects are stored in `.meta.json` (only losses, predictions, model_name).
+- Run `plot_graphics.py` on an existing results folder to confirm migration behavior.

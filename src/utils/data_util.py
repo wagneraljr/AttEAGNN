@@ -15,23 +15,23 @@ class DataUtil:
         node_features = torch.tensor(np.eye(G.number_of_nodes()), dtype=torch.float32)
         edge_indices = torch.tensor(np.array(G.edges()), dtype=torch.long).t().contiguous()
         
-        # Cálculo das métricas (apenas se solicitado para economizar processamento)
+        # Compute metrics (only if requested to save processing)
         edge_betweenness = nx.edge_betweenness_centrality(G) if use_betweenness else None
         
         edge_features = []
 
         for src, dst, data in G.edges(data=True):
             feature = []
-            # 1. Atributos Originais (8 dimensões) [2]
+            # 1. Original attributes (8 dimensions) [2]
             if use_original:
                 feature.extend(data.get('feature', [0]*8))
-            # 2. Centralidade de Intermediação [2, 6]
+            # 2. Betweenness centrality [2, 6]
             if use_betweenness:
                 feature.append(edge_betweenness[(src, dst)])
-            # 3. Grau da Aresta [2, 7]
+            # 3. Edge degree [2, 7]
             if use_degree:
                 feature.append(G.degree[src] + G.degree[dst])
-            # 4. Coeficiente de Agrupamento [3, 7]
+            # 4. Clustering coefficient [3, 7]
             if use_clustering:
                 avg_clustering = (nx.clustering(G, src) + nx.clustering(G, dst)) / 2
                 feature.append(avg_clustering)
