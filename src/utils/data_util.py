@@ -5,56 +5,41 @@ import csv
 import os
 import pandas as pd
 class DataUtil:
+
     @staticmethod
-    # Generates graph information, node and edge features from a .gml file
-    def load_data(filepath):
-            # Creates the RNP network graph from the .gml file
-            G = nx.read_gml(filepath)
+    def load_data(filepath, use_original=True, use_betweenness=True, use_degree=True, use_clustering=True):
+        G = nx.read_gml(filepath)
+        label_to_index = {label: idx for idx, label in enumerate(G.nodes())}
+        G = nx.relabel_nodes(G, label_to_index)
+        
+        node_features = torch.tensor(np.eye(G.number_of_nodes()), dtype=torch.float32)
+        edge_indices = torch.tensor(np.array(G.edges()), dtype=torch.long).t().contiguous()
+        
+        # Cálculo das métricas (apenas se solicitado para economizar processamento)
+        edge_betweenness = nx.edge_betweenness_centrality(G) if use_betweenness else None
+        
+        edge_features = []
 
-            # Maps node labels to integer indices
-            label_to_index = {label: idx for idx, label in enumerate(G.nodes())}
-            
-            # Updates node labels to integer values
-            G = nx.relabel_nodes(G, label_to_index)
-
-            # Extract node features (one-hot encoding)
-            node_features = np.eye(G.number_of_nodes())
-            node_features = torch.tensor(node_features, dtype=torch.float32)
-
-            # Extract edge feautures
-            edge_indices = np.array(G.edges())
-            edge_indices = torch.tensor(edge_indices, dtype=torch.long).t().contiguous()
-
-            # Calculate implicit edge features
-            # Calculate edge betweenness 
-            edge_betweenness = nx.edge_betweenness_centrality(G)
-
-            # Appends edge features
-            edge_features = []
-            for edge in G.edges(data=True):
-                src, dst = edge[0], edge[1]
-                
-                # Explicit features, or a vector of zeros if none
-                feature = edge[2].get('feature', [0]*8)
-                
-                # Edge betweenness
+        for src, dst, data in G.edges(data=True):
+            feature = []
+            # 1. Atributos Originais (8 dimensões) [2]
+            if use_original:
+                feature.extend(data.get('feature', [0]*8))
+            # 2. Centralidade de Intermediação [2, 6]
+            if use_betweenness:
                 feature.append(edge_betweenness[(src, dst)])
-                
-                # Edge degree, defined as the sum of the degrees of its nodes
+            # 3. Grau da Aresta [2, 7]
+            if use_degree:
                 feature.append(G.degree[src] + G.degree[dst])
-                
-                # Edge clustering coefficient, defined as the average of its nodes coefficients
-                clustering_src = nx.clustering(G, src)
-                clustering_dst = nx.clustering(G, dst)
-                avg_clustering = (clustering_src + clustering_dst) / 2
+            # 4. Coeficiente de Agrupamento [3, 7]
+            if use_clustering:
+                avg_clustering = (nx.clustering(G, src) + nx.clustering(G, dst)) / 2
                 feature.append(avg_clustering)
-                
-                edge_features.append(feature)
+            edge_features.append(feature)
             
-            # Convert edge features to tensor
-            edge_features = torch.tensor(edge_features, dtype=torch.float32)
-            
-            return node_features, edge_indices, edge_features
+        edge_features = torch.tensor(edge_features, dtype=torch.float32)
+        return node_features, edge_indices, edge_features
+ 
     @staticmethod
     # Auxiliary function for CAGNN graph processing
     def create_graphs_from_nx(G):
@@ -77,6 +62,7 @@ class DataUtil:
                     edge_neighbors[j].append(i)
 
         return node_neighbors, edge_neighbors
+    
     @staticmethod
     # Generates graph information for the CAGNN model
     def load_data_cagnn(filepath):
@@ -130,8 +116,9 @@ class DataUtil:
         node_neighbors, edge_neighbors = DataUtil.create_graphs_from_nx(G)
         
         return node_features, edge_indices, edge_features, node_neighbors, edge_neighbors
+    
     @staticmethod
-    def get_node_loads(traffic_matrix_filepath):
+    def get_node_loads(traffic_matrix_filepath, abilene=False):
         
         # Process .dat files to extract traffic matrix data
         traffic_matrix = []
@@ -140,7 +127,9 @@ class DataUtil:
             for row in reader:
                 if not row[0].startswith("#"):
                     traffic_matrix.append([float(value) for value in row])
-    
+        if abilene:
+            traffic_matrix = traffic_matrix[1:]  # Remove the first row for Abilene dataset
+            
         # Get node loads
         node_loads_values = []
         for i in range(len(traffic_matrix)):
@@ -175,4 +164,4 @@ class DataUtil:
     
     @staticmethod
     def load_data_gnn(filepath):
-        return DataUtil.load_data(filepath)[0:2]
+        return DataUtil.load_data(filepath, use_betweenness=False, use_degree=False, use_clustering=False)[0:2]

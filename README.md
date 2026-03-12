@@ -64,3 +64,59 @@ Our tool allows the inclusion of custom GNN models for training and testing on t
 4. If you have already run the experiments, execute the training in `train_models.py` only for your model and run the `plot_graphics.py` script. Otherwise, run the `run_experiments.sh` including your model.
 
 5. View the graphics in the `results/` folder.
+
+## Switching between datasets
+
+You can choose the dataset (`abilene` or `rnp`) directly from the command line when running `train_models.py`.
+
+Examples:
+
+- Train using the Abilene dataset (default):
+
+```bash
+python train_models.py --dataset abilene
+```
+
+- Train using the RNP dataset:
+
+```bash
+python train_models.py --dataset rnp
+```
+
+- Perform a dry run (prints selected paths without training):
+
+```bash
+python train_models.py --dry-run --dataset abilene
+python train_models.py --dry-run --dataset rnp
+```
+
+Notes:
+
+- Default paths used by the project:
+    - Abilene GML: `data/abilene.gml` and TMs in `data/traffic_matrices/abilene/day/`.
+    - RNP GML: `data/rnp.gml` and TMs in `data/traffic_matrices/sparsified_gravity_cyclical/day/`.
+- To change these paths, edit `src/constants.py`.
+
+Split selection (day/week)
+
+Each dataset contains two TM splits under `data/traffic_matrices/...`: `day` and `week`.
+You can choose which split to use during training with the `--split` flag (default: `day`).
+
+Examples:
+
+```bash
+# Train on Abilene, using the week split
+python train_models.py --dataset abilene --split week
+
+# Train on RNP, using the day split (default)
+python train_models.py --dataset rnp --split day
+
+# Dry-run to print chosen paths
+python train_models.py --dry-run --dataset abilene --split week
+```
+
+Note on results location:
+
+Training outputs are saved under `results/<dataset>/<split>/<model_name>/`.
+For example: `results/abilene/day/AttEAGNN/AttEAGNN.ckpt`.
+
