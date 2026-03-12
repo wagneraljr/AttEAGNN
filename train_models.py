@@ -25,6 +25,8 @@ def parse_args():
                         help='Disable edge degree feature (default: enabled)')
     parser.add_argument('--no-clustering', action='store_false', dest='use_clustering',
                         help='Disable clustering coefficient feature (default: enabled)')
+    parser.add_argument('--no-edge-norm', action='store_false', dest='use_edge_norm',
+                        help='Disable z-score normalization of edge features (default: enabled)')
     parser.add_argument('--dry-run', action='store_true', help='Only print chosen paths and exit.')
     parser.add_argument('--models', nargs='+', choices=['AttEAGNN','GraphSAGE','GCN','CAGNN'], default=['AttEAGNN'],
                         help='Which models to train (space separated). Default: AttEAGNN')
@@ -72,6 +74,9 @@ def main():
         apply_fn = getattr(cfg, 'apply_dataset_split', None)
         if callable(apply_fn):
             cfg.apply_dataset_split(dataset_name, args.split)
+        # Apply runtime override for edge feature normalization
+        if not args.use_edge_norm:
+            cfg.edge_norm_func = None
 
     for config in configs:
         model_laucher = ModelLauncher(config)

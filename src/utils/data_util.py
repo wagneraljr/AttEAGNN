@@ -128,7 +128,11 @@ class DataUtil:
                 if not row[0].startswith("#"):
                     traffic_matrix.append([float(value) for value in row])
         if abilene:
-            traffic_matrix = traffic_matrix[1:]  # Remove the first row for Abilene dataset
+            # Abilene .dat files include a header row and an index column.
+            # Match the slicing used in the original reference implementation
+            # (EdgeAwareGNN-main) which removes the first row and the first
+            # column: take row[1:] for each row after the header.
+            traffic_matrix = [row[1:] for row in traffic_matrix[1:]]
             
         # Get node loads
         node_loads_values = []
