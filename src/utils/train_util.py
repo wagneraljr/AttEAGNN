@@ -4,7 +4,9 @@ from src.utils.data_util import DataUtil
 import torch
 import numpy as np
 from tqdm import tqdm
-from src.constants import Constants
+import os
+
+
 class TrainUtil:
     @staticmethod
     def train_step(model,optimizer,loss_fn,packaged_data,target,scheduler=None):
@@ -18,12 +20,14 @@ class TrainUtil:
         return loss.item()
 
     @staticmethod
-    def train_epoch(epochs,data:DataInterface,traffic_matrix_files,model,optimizer,loss_fn,scheduler=None):
+    def train_epoch(epochs, data: DataInterface, traffic_matrix_files, model, optimizer, loss_fn, scheduler=None, dataset: str = 'abilene'):
         losses = []
         for epoch in tqdm(range(epochs)):
             for traffic_matrix_filepath in traffic_matrix_files:
-                tm = Constants.path_to_day_tm_files + traffic_matrix_filepath
-                node_loads = DataUtil.get_node_loads(tm)
-                loss = TrainUtil.train_step(model,optimizer,loss_fn,data.get_model_args(),node_loads,scheduler)
+                # traffic_matrix_files expected to be full paths; use directly
+                tm = traffic_matrix_filepath
+                is_abilene = dataset.lower() == 'abilene'
+                node_loads = DataUtil.get_node_loads(tm, abilene=is_abilene)
+                loss = TrainUtil.train_step(model, optimizer, loss_fn, data.get_model_args(), node_loads, scheduler)
                 losses.append(loss)
         return losses
