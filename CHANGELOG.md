@@ -1,30 +1,42 @@
 # CHANGELOG
 
-## 2026-03-12 — melhorias: seleção de dataset e correções
+## 2026-03-12 — Improvements: dataset selection and fixes
 
-Adicionado/Modificado:
+Added/Modified:
 
 - `train_models.py`
-  - Adicionada interface de linha de comando `--dataset {abilene,rnp}` e `--dry-run`.
-  - Agora é possível alternar entre os datasets sem editar o código.
+  - Added command-line interface options `--dataset {abilene,rnp}` and `--dry-run`.
+  - Allows switching between datasets without editing source files.
 
 - `src/model_launcher.py`
-  - `train()` aceita parâmetro `dataset` e seleciona automaticamente a pasta de traffic matrices correspondente.
-  - Instancia o modelo somente após carregar os dados, ajustando dinamicamente os parâmetros de entrada (`node_input_dim`, `edge_input_dim`).
+  - `train()` accepts a `dataset` parameter and automatically selects the corresponding traffic-matrix folder.
+  - Instantiates the model only after loading data, dynamically adjusting input parameters (`node_input_dim`, `edge_input_dim`).
 
 - `src/utils/train_util.py`
-  - Correção na construção dos caminhos dos arquivos de traffic matrices; tenta o caminho do dataset Abilene quando aplicável.
-  - Passa a flag `abilene=True` ao chamar `DataUtil.get_node_loads` para alinhar o formato dos TMs do Abilene.
+  - Fixed construction of traffic-matrix file paths; attempts the Abilene path when applicable.
+  - Passes the `abilene=True` flag to `DataUtil.get_node_loads` to align Abilene TM formatting.
 
 - `README.md`
-  - Nova seção com instruções para alternar entre datasets e exemplos de uso de `--dry-run`.
+  - Added a section with instructions to switch datasets and examples for `--dry-run`.
 
-Motivação:
+Motivation:
 
-- Facilitar experimentação entre os dois datasets disponíveis (Abilene e RNP) sem necessidade de edição manual do código.
-- Corrigir erros de path e incompatibilidades de dimensões observadas ao usar o dataset Abilene.
+- Make it easier to experiment with both available datasets (Abilene and RNP) without manual code edits.
+- Fix path and dimension mismatches observed when using the Abilene dataset.
 
-Notas:
+Notes:
 
-- Se desejar que a seleção de dataset seja persistente em configurações, considere adicionar uma propriedade `dataset` na classe `Config`.
-- Recomenda-se revisar `src/constants.py` caso queira alterar os caminhos padrões dos datasets ou TMs.
+- If you want dataset selection to be persistent in configurations, consider adding a `dataset` field to the `Config` class.
+- Review `src/constants.py` if you want to change the default dataset or traffic-matrix paths.
+
+## 2026-03-12 — Feature: edge-feature CLI flags
+
+Added:
+
+- `train_models.py`
+  - New CLI flags to enable/disable computed edge features at runtime: `--no-original`, `--no-betweenness`, `--no-degree`, `--no-clustering`. By default all features are used.
+
+Motivation:
+
+- Allow quick experiments to evaluate the impact of individual edge features without changing source code.
+

@@ -118,5 +118,40 @@ python train_models.py --dry-run --dataset abilene --split week
 Note on results location:
 
 Training outputs are saved under `results/<dataset>/<split>/<model_name>/`.
-For example: `results/abilene/day/AttEAGNN/AttEAGNN.ckpt`.
+Each trained experiment now stores weights and metadata separately:
+
+- `<model_name>.weights.pt` — the model `state_dict` (PyTorch tensors).
+- `<model_name>.meta.json` — training metadata (loss history, predictions, model name).
+
+Example (directory): `results/abilene/day/AttEAGNN/` containing `AttEAGNN.weights.pt` and `AttEAGNN.meta.json`.
+
+Edge feature selection
+
+You can enable or disable computed edge features at runtime using CLI flags. By default all features are enabled.
+
+Flags:
+
+- `--no-original` : disable original edge attributes
+- `--no-betweenness` : disable betweenness centrality
+- `--no-degree` : disable edge degree
+- `--no-clustering` : disable clustering coefficient
+
+Example:
+
+```bash
+# Train Abilene using only original attributes and degree (disable betweenness and clustering)
+python train_models.py --dataset abilene --split day --no-betweenness --no-clustering
+```
+
+Model selection and hyperparameters
+
+You can choose which models to train at runtime with the `--models` flag. The available model names are: `AttEAGNN`, `GraphSAGE`, `GCN`, `CAGNN`. By default only `AttEAGNN` is selected.
+
+Example — train AttEAGNN and GCN on Abilene/day:
+
+```bash
+python train_models.py --models AttEAGNN GCN --dataset abilene --split day
+```
+
+Model-specific hyperparameter overrides for particular `(dataset, split)` combinations are provided inside each configuration in `configs/`. These are automatically applied when running `train_models.py` (no manual changes required). To change or add overrides, edit the corresponding `configs/<model>_config.py` file.
 
