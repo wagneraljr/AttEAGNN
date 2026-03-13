@@ -143,6 +143,21 @@ Example:
 python train_models.py --dataset abilene --split day --no-betweenness --no-clustering
 ```
 
+Edge feature normalization
+
+The project applies z-score normalization (mean 0, std 1) to node and edge features by default via `DataUtil.normalize_features`.
+
+- Which models are affected: models that consume edge features — currently `AttEAGNN` and `CAGNN` use edge features and therefore are affected by edge normalization. `GCN` and `GraphSAGE` (as used here) do not use edge features and are not affected.
+- Why this matters: normalizing edge features changes their scale and distribution; the original reference implementation did not normalize edge features for Abilene, which can lead to different training dynamics and final metrics.
+
+You can disable edge-feature normalization at runtime with `--no-edge-norm` to match the original (non-normalized) behavior:
+
+```bash
+python train_models.py --dataset abilene --split day --no-edge-norm
+```
+
+When reproducing experiments from external codebases, ensure `--no-edge-norm` is used if the reference did not normalize edge features.
+
 Model selection and hyperparameters
 
 You can choose which models to train at runtime with the `--models` flag. The available model names are: `AttEAGNN`, `GraphSAGE`, `GCN`, `CAGNN`. By default only `AttEAGNN` is selected.
@@ -154,4 +169,20 @@ python train_models.py --models AttEAGNN GCN --dataset abilene --split day
 ```
 
 Model-specific hyperparameter overrides for particular `(dataset, split)` combinations are provided inside each configuration in `configs/`. These are automatically applied when running `train_models.py` (no manual changes required). To change or add overrides, edit the corresponding `configs/<model>_config.py` file.
+ 
+**Hyperparameter Optimization**
+You can run Optuna-based hyperparameter searches using the new `hyper.py` script. It accepts the same `--models`, `--dataset` and `--split` flags and uses the per-model config search space.
+
+Examples:
+
+- Dry-run to show planned trials:
+```
+python hyper.py --models AttEAGNN --dataset abilene --split day --dry-run
+```
+- Run 50 Optuna trials for AttEAGNN on Abilene/day:
+```
+python hyper.py --models AttEAGNN --dataset abilene --split day --n-trials 50
+```
+
+Results are saved as `hp_<model>_<dataset>_<split>.json` in the `results/` folder.
 

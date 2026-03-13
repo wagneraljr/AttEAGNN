@@ -27,8 +27,15 @@ class ModelLauncher:
         print()
         print(f'Training Model {self.config.model_name}')
         print(f"{self.config.model_name} Configuration:")
-        for k,v in self.config.__dict__.items():
-            print(f'\t{k}:',v)
+        for k, v in self.config.__dict__.items():
+            # Hide large hp_overrides dictionary from verbose config output
+            if k == 'hp_overrides':
+                try:
+                    entries = len(v) if v is not None else 0
+                except Exception:
+                    print(f'\t{k}: <hidden dict>')
+                continue
+            print(f'\t{k}:', v)
         print()
         
         data = self.config.load_data_func(path_to_gml_data,

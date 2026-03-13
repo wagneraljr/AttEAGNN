@@ -28,7 +28,7 @@ if not os.path.isdir(results_folder):
     raise FileNotFoundError(f"Results folder not found: {results_folder}")
 
 ckpts = {}
-# Gather checkpoints from the new layout:
+# Gather checkpoints
 # results/<dataset>/<split>/<model_name>/<model_name>.ckpt
 model_dirs = [d for d in os.listdir(results_folder) if os.path.isdir(os.path.join(results_folder, d))]
 for model_dir in model_dirs:
